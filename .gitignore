@@ -1,0 +1,49 @@
+# Unity generated folders
+[Ll]ibrary/
+[Tt]emp/
+[Oo]bj/
+[Bb]uild/
+[Bb]uilds/
+[Ll]ogs/
+[Uu]ser[Ss]ettings/
+
+# Memory capture
+[Mm]emory[Cc]aptures/
+
+# Recordings
+[Rr]ecordings/
+
+# Unity asset metadata must be committed.
+# Do not ignore *.meta files; Unity uses them to preserve asset GUIDs.
+
+# OpenCode / OhMyOpenCode local state
+.omo/
+
+# IDE
+.vs/
+.vscode/
+*.csproj
+*.sln
+*.suo
+*.user
+*.userprefs
+*.pidb
+*.booproj
+*.svd
+*.pdb
+*.mdb
+*.opendb
+*.VC.db
+
+# Builds
+*.apk
+*.aab
+*.unitypackage
+*.app
+
+# Crashlytics
+sysinfo.txt
+
+# OS
+.DS_Store
+Thumbs.db
