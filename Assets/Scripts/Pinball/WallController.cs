@@ -39,7 +39,8 @@ public class WallController : MonoBehaviour, IPinballElement
             mat.bounciness = bounciness;
             mat.bounceCombine = PhysicMaterialCombine.Average;
             mat.frictionCombine = PhysicMaterialCombine.Minimum;
-            mat.friction = 0.1f;
+            mat.dynamicFriction = 0.1f;
+            mat.staticFriction = 0.1f;
             col.sharedMaterial = mat;
         }
     }

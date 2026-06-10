@@ -15,7 +15,6 @@ public class FloatingScoreText : MonoBehaviour
 
     private float _timer;
     private float _startScale;
-    private bool _isUI;
 
     public static FloatingScoreText Create(Vector3 worldPos, int score, float multiplier, Transform cameraTransform)
     {
@@ -25,7 +24,6 @@ public class FloatingScoreText : MonoBehaviour
         FloatingScoreText fst = go.AddComponent<FloatingScoreText>();
         TextMeshPro tmp = go.AddComponent<TextMeshPro>();
         fst.textMesh = tmp;
-        fst._isUI = false;
 
         tmp.fontSize = 3f;
         tmp.alignment = TextAlignmentOptions.Center;

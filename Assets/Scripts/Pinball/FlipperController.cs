@@ -17,7 +17,7 @@ public class FlipperController : MonoBehaviour, IPinballElement
     public KeyCode touchRightKey = KeyCode.D;
 
     [Header("Hinge")]
-    public HingeJoint hingeJoint;
+    public new HingeJoint hingeJoint;
 
     [Header("Visual")]
     public MeshRenderer flipperRenderer;

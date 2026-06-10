@@ -79,7 +79,6 @@ public class PinballBuildConfig : MonoBehaviour
         };
 
         PlayerSettings.WebGL.compressionFormat = WebGLCompressionFormat.Brotli;
-        PlayerSettings.WebGL.codeOptimization = WebGLCodeOptimization.Speed;
 
         BuildPipeline.BuildPlayer(options);
         Debug.Log($"Build complete: {path}");

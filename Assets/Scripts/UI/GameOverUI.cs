@@ -83,7 +83,12 @@ public class GameOverUI : MonoBehaviour
     {
         if (panelAnimator != null)
             panelAnimator.SetTrigger("Hide");
-        Invoke(() => GameManager.Instance?.RestartGame(), 0.3f);
+        Invoke(nameof(RestartGameAfterHide), 0.3f);
+    }
+
+    private void RestartGameAfterHide()
+    {
+        GameManager.Instance?.RestartGame();
     }
 
     private void OnMainMenuClicked()
