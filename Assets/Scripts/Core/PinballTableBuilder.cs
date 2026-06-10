@@ -74,30 +74,65 @@ public class PinballTableBuilder : MonoBehaviour
     private void CreateWalls()
     {
         Transform root = transform.Find("TableRoot");
+        float topZ = tableHeight / 2f;
+        float sideJoinZ = topZ - 1.25f;
+        float sideWallCenterZ = (-tableHeight / 2f + sideJoinZ) * 0.5f;
+        float sideWallLength = sideJoinZ + tableHeight / 2f;
 
         CreateWall(root, "LeftWall",
-            new Vector3(-tableWidth / 2 - wallThickness / 2, wallHeight / 2, 0),
-            new Vector3(wallThickness, wallHeight, tableHeight));
+            new Vector3(-tableWidth / 2 - wallThickness / 2, wallHeight / 2, sideWallCenterZ),
+            new Vector3(wallThickness, wallHeight, sideWallLength));
 
         CreateWall(root, "RightWall",
-            new Vector3(tableWidth / 2 + wallThickness / 2, wallHeight / 2, 0),
-            new Vector3(wallThickness, wallHeight, tableHeight));
+            new Vector3(tableWidth / 2 + wallThickness / 2, wallHeight / 2, sideWallCenterZ),
+            new Vector3(wallThickness, wallHeight, sideWallLength));
 
-        CreateWall(root, "TopWall",
-            new Vector3(0, wallHeight / 2, tableHeight / 2 + wallThickness / 2),
-            new Vector3(tableWidth + wallThickness * 2, wallHeight, wallThickness));
+        CreateCurvedTopWall(root, sideJoinZ);
 
         CreateWall(root, "LaunchLaneRight",
             new Vector3(tableWidth / 2 - 0.3f, wallHeight / 2, -tableHeight / 4),
             new Vector3(wallThickness, wallHeight, tableHeight / 2));
     }
 
+    private void CreateCurvedTopWall(Transform parent, float sideJoinZ)
+    {
+        float halfWidth = tableWidth / 2f;
+        float topZ = tableHeight / 2f;
+        float rise = topZ - sideJoinZ;
+        float radius = (halfWidth * halfWidth + rise * rise) / (2f * rise);
+        float centerZ = topZ - radius;
+        float maxTheta = Mathf.Asin(halfWidth / radius);
+        int segments = 12;
+        float overlap = 0.03f;
+
+        for (int i = 0; i < segments; i++)
+        {
+            float t0 = Mathf.Lerp(-maxTheta, maxTheta, i / (float)segments);
+            float t1 = Mathf.Lerp(-maxTheta, maxTheta, (i + 1) / (float)segments);
+
+            Vector3 p0 = new Vector3(radius * Mathf.Sin(t0), wallHeight / 2f, centerZ + radius * Mathf.Cos(t0));
+            Vector3 p1 = new Vector3(radius * Mathf.Sin(t1), wallHeight / 2f, centerZ + radius * Mathf.Cos(t1));
+            Vector3 mid = (p0 + p1) * 0.5f;
+            Vector3 delta = p1 - p0;
+
+            CreateWall(parent, $"TopArcWall_{i:00}", mid,
+                new Vector3(wallThickness, wallHeight, delta.magnitude + overlap),
+                Quaternion.Euler(0f, Mathf.Atan2(delta.x, delta.z) * Mathf.Rad2Deg, 0f));
+        }
+    }
+
     private void CreateWall(Transform parent, string name, Vector3 position, Vector3 scale)
+    {
+        CreateWall(parent, name, position, scale, Quaternion.identity);
+    }
+
+    private void CreateWall(Transform parent, string name, Vector3 position, Vector3 scale, Quaternion rotation)
     {
         GameObject wall = GameObject.CreatePrimitive(PrimitiveType.Cube);
         wall.name = name;
         wall.transform.SetParent(parent);
         wall.transform.localPosition = position;
+        wall.transform.localRotation = rotation;
         wall.transform.localScale = scale;
 
         Renderer renderer = wall.GetComponent<Renderer>();
@@ -216,6 +251,6 @@ public class PinballTableBuilder : MonoBehaviour
     {
         Transform root = transform.Find("TableRoot");
         if (root != null)
-            root.localRotation = Quaternion.Euler(tableTilt, 0, 0);
+            root.localRotation = Quaternion.Euler(-tableTilt, 0, 0);
     }
 }
