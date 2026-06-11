@@ -14,6 +14,7 @@ public class GameSceneSetup : MonoBehaviour
     public PlungerController plunger;
     public CameraController gameCamera;
     public PinballTableBuilder tableBuilder;
+    public CyberpunkMaterialGenerator cyberpunkGenerator;
 
     [Header("UI")]
     public GameHUD gameHUD;
@@ -24,6 +25,7 @@ public class GameSceneSetup : MonoBehaviour
     [Header("Scene Setup")]
     public bool autoBuildTable = true;
     public bool startWithMenu = true;
+    public bool enableCyberpunkStyle = true;
 
     private void Awake()
     {
@@ -32,6 +34,11 @@ public class GameSceneSetup : MonoBehaviour
 
     private void Start()
     {
+        if (enableCyberpunkStyle && cyberpunkGenerator != null)
+        {
+            cyberpunkGenerator.GenerateMaterials();
+        }
+
         if (autoBuildTable && tableBuilder != null)
             tableBuilder.BuildTable();
 
