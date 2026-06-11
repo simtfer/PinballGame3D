@@ -4,22 +4,22 @@ public class TableLightingController : MonoBehaviour
 {
     [Header("Ambient Lighting")]
     public Light ambientLight;
-    public Color ambientDayColor = new Color(0.2f, 0.2f, 0.4f);
-    public Color ambientNightColor = new Color(0.05f, 0.05f, 0.15f);
+    public Color ambientDayColor = new Color(0.02f, 0.02f, 0.1f);
+    public Color ambientNightColor = new Color(0.01f, 0.01f, 0.05f);
 
     [Header("Spot Lights")]
     public Light[] spotLights;
-    public float spotLightIntensity = 3f;
-    public float spotLightRange = 8f;
+    public float spotLightIntensity = 4f;
+    public float spotLightRange = 10f;
 
     [Header("Neon Strips")]
     public MeshRenderer[] neonStrips;
     public Color[] neonColors = new Color[]
     {
         new Color(0f, 1f, 1f),
-        new Color(1f, 0f, 1f),
-        new Color(1f, 0.5f, 0f),
-        new Color(0f, 1f, 0.5f)
+        new Color(1f, 0.176f, 0.584f),
+        new Color(0f, 1f, 0.8f),
+        new Color(0.8f, 0f, 1f)
     };
     public float neonScrollSpeed = 0.5f;
 
