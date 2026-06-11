@@ -319,7 +319,7 @@ public class PinballTableBuilder : MonoBehaviour
         wallMaterial = cyberpunkGenerator.GetWallMaterial();
         bumperMaterial = cyberpunkGenerator.GetBumperMaterial();
         flipperMaterial = cyberpunkGenerator.GetFlipperMaterial();
-        safetyPanelMaterial = cyberpunkGenerator.GetNeonMaterial();
+        safetyPanelMaterial = cyberpunkGenerator.GetTransparentMaterial();
         neonMaterial = cyberpunkGenerator.GetNeonMaterial();
     }
 }

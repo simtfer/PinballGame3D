@@ -18,6 +18,7 @@ public class CyberpunkMaterialGenerator : MonoBehaviour
     private Material _flipperMat;
     private Material _slingshotMat;
     private Material _neonMat;
+    private Material _transparentMat;
 
     public void GenerateMaterials()
     {
@@ -27,6 +28,7 @@ public class CyberpunkMaterialGenerator : MonoBehaviour
         CreateFlipperMaterial();
         CreateSlingshotMaterial();
         CreateNeonMaterial();
+        CreateTransparentMaterial();
     }
 
     private void CreateTableSurfaceMaterial()
@@ -89,10 +91,27 @@ public class CyberpunkMaterialGenerator : MonoBehaviour
         _neonMat.EnableKeyword("_EMISSION");
     }
 
+    private void CreateTransparentMaterial()
+    {
+        _transparentMat = new Material(Shader.Find("Universal Render Pipeline/Lit"));
+        _transparentMat.SetColor("_BaseColor", new Color(0.1f, 0.15f, 0.3f, 0.2f));
+        _transparentMat.SetFloat("_Smoothness", 0.95f);
+        _transparentMat.SetFloat("_Metallic", 0.1f);
+        _transparentMat.SetFloat("_Surface", 1); // 1 = Transparent
+        _transparentMat.SetFloat("_Blend", 0);   // 0 = Alpha
+        _transparentMat.SetFloat("_SrcBlend", (float)UnityEngine.Rendering.BlendMode.SrcAlpha);
+        _transparentMat.SetFloat("_DstBlend", (float)UnityEngine.Rendering.BlendMode.OneMinusSrcAlpha);
+        _transparentMat.SetFloat("_ZWrite", 0);
+        _transparentMat.renderQueue = (int)UnityEngine.Rendering.RenderQueue.Transparent;
+        _transparentMat.EnableKeyword("_SURFACE_TYPE_TRANSPARENT");
+        _transparentMat.EnableKeyword("_ALPHAPREMULTIPLY_ON");
+    }
+
     public Material GetTableSurfaceMaterial() => _tableSurfaceMat;
     public Material GetWallMaterial() => _wallMat;
     public Material GetBumperMaterial() => _bumperMat;
     public Material GetFlipperMaterial() => _flipperMat;
     public Material GetSlingshotMaterial() => _slingshotMat;
     public Material GetNeonMaterial() => _neonMat;
+    public Material GetTransparentMaterial() => _transparentMat;
 }
