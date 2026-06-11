@@ -63,6 +63,10 @@ public static class PinballSceneGenerator
             cameraController,
             tableBuilder);
 
+        CyberpunkMaterialGenerator cyberpunkGenerator = gameSceneSetup.gameObject.AddComponent<CyberpunkMaterialGenerator>();
+        tableBuilder.cyberpunkGenerator = cyberpunkGenerator;
+        gameSceneSetup.cyberpunkGenerator = cyberpunkGenerator;
+
         CreateBasicEventSystem();
 
         tableBuilder.BuildTable();
@@ -124,8 +128,8 @@ public static class PinballSceneGenerator
         Vector3 tableForward = tableRotation * Vector3.forward;
         Vector3 target = tableRoot != null ? tableRoot.TransformPoint(Vector3.zero) : tableBuilder.transform.position;
 
-        camera.transform.position = target + tableNormal * 12f;
-        camera.transform.rotation = Quaternion.LookRotation(-tableNormal, tableForward);
+        camera.transform.position = target + tableNormal * 12f + Vector3.back * (tableBuilder.tableHeight * 0.5f);
+        camera.transform.rotation = Quaternion.LookRotation(target - camera.transform.position, tableForward);
         camera.orthographic = true;
         camera.orthographicSize = tableBuilder.tableHeight * 0.55f;
     }
@@ -185,11 +189,116 @@ public static class PinballSceneGenerator
 
     private static void AssignDefaultMaterials(PinballTableBuilder builder)
     {
+        EnsureCyberpunkMaterials();
+
         builder.tableSurfaceMaterial = LoadMaterial("Assets/Materials/TableSurface.mat");
         builder.wallMaterial = LoadMaterial("Assets/Materials/Wall.mat");
         builder.bumperMaterial = LoadMaterial("Assets/Materials/Bumper.mat");
         builder.flipperMaterial = LoadMaterial("Assets/Materials/Flipper.mat");
         builder.neonMaterial = LoadMaterial("Assets/Materials/NeonStrip.mat");
+        builder.safetyPanelMaterial = LoadMaterial("Assets/Materials/SafetyPanel.mat");
+    }
+
+    private static void EnsureCyberpunkMaterials()
+    {
+        string matPath = "Assets/Materials";
+        if (!AssetDatabase.IsValidFolder(matPath))
+            AssetDatabase.CreateFolder("Assets", "Materials");
+
+        Shader neonShader = Shader.Find("Pinball/NeonGlow");
+        if (neonShader == null)
+            neonShader = Shader.Find("Universal Render Pipeline/Lit");
+        if (neonShader == null)
+            neonShader = Shader.Find("Standard");
+
+        Shader glassShader = Shader.Find("Universal Render Pipeline/Lit");
+        if (glassShader == null)
+            glassShader = Shader.Find("Standard");
+        if (glassShader == null)
+            glassShader = neonShader;
+
+        CreateOrUpdateMaterial(matPath, "TableSurface", neonShader, new Color(0.015f, 0.02f, 0.06f, 1f), new Color(0.02f, 0.08f, 0.16f, 1f), 0.7f);
+        CreateOrUpdateMaterial(matPath, "Wall", neonShader, new Color(0.02f, 0.08f, 0.12f, 1f), new Color(0f, 0.9f, 1f, 1f), 1.8f);
+        CreateOrUpdateMaterial(matPath, "Bumper", neonShader, new Color(0.05f, 0.08f, 0.18f, 1f), new Color(1f, 0.92f, 0.08f, 1f), 2.1f);
+        CreateOrUpdateMaterial(matPath, "Flipper", neonShader, new Color(1f, 0.02f, 0.38f, 1f), new Color(1f, 0f, 0.72f, 1f), 1.9f);
+        CreateOrUpdateMaterial(matPath, "NeonStrip", neonShader, new Color(0.005f, 0.005f, 0.02f, 1f), new Color(0f, 1f, 1f, 1f), 2.4f);
+        CreateOrUpdateMaterial(matPath, "Ball", neonShader, new Color(0.82f, 0.95f, 1f, 1f), new Color(0f, 0.85f, 1f, 1f), 1.4f);
+
+        Material safetyPanel = CreateOrUpdateMaterial(matPath, "SafetyPanel", glassShader, new Color(0.05f, 0.9f, 1f, 0.28f), new Color(0f, 0.85f, 1f, 1f), 0.8f);
+        ConfigureTransparentMaterial(safetyPanel, new Color(0.05f, 0.9f, 1f, 0.28f));
+
+        AssetDatabase.SaveAssets();
+        AssetDatabase.Refresh();
+    }
+
+    private static Material CreateOrUpdateMaterial(string path, string name, Shader shader, Color baseColor, Color emissionColor, float glowIntensity)
+    {
+        string assetPath = $"{path}/{name}.mat";
+        Material material = AssetDatabase.LoadAssetAtPath<Material>(assetPath);
+        if (material == null)
+        {
+            material = new Material(shader);
+            AssetDatabase.CreateAsset(material, assetPath);
+        }
+        else if (shader != null && material.shader != shader)
+        {
+            material.shader = shader;
+        }
+
+        SetMaterialColor(material, "_BaseColor", baseColor);
+        SetMaterialColor(material, "_Color", baseColor);
+        SetMaterialColor(material, "_EmissionColor", emissionColor);
+
+        if (material.HasProperty("_GlowIntensity"))
+            material.SetFloat("_GlowIntensity", glowIntensity);
+        if (material.HasProperty("_Smoothness"))
+            material.SetFloat("_Smoothness", 0.78f);
+        if (material.HasProperty("_Metallic"))
+            material.SetFloat("_Metallic", 0.05f);
+
+        if (emissionColor.maxColorComponent > 0f)
+            material.EnableKeyword("_EMISSION");
+
+        EditorUtility.SetDirty(material);
+        return material;
+    }
+
+    private static void ConfigureTransparentMaterial(Material material, Color glassColor)
+    {
+        if (material == null)
+            return;
+
+        SetMaterialColor(material, "_BaseColor", glassColor);
+        SetMaterialColor(material, "_Color", glassColor);
+
+        if (material.HasProperty("_Surface"))
+            material.SetFloat("_Surface", 1f);
+        if (material.HasProperty("_Blend"))
+            material.SetFloat("_Blend", 0f);
+        if (material.HasProperty("_AlphaClip"))
+            material.SetFloat("_AlphaClip", 0f);
+        if (material.HasProperty("_Mode"))
+            material.SetFloat("_Mode", 3f);
+        if (material.HasProperty("_SrcBlend"))
+            material.SetInt("_SrcBlend", (int)UnityEngine.Rendering.BlendMode.SrcAlpha);
+        if (material.HasProperty("_DstBlend"))
+            material.SetInt("_DstBlend", (int)UnityEngine.Rendering.BlendMode.OneMinusSrcAlpha);
+        if (material.HasProperty("_ZWrite"))
+            material.SetInt("_ZWrite", 0);
+
+        material.SetOverrideTag("RenderType", "Transparent");
+        material.EnableKeyword("_SURFACE_TYPE_TRANSPARENT");
+        material.EnableKeyword("_ALPHABLEND_ON");
+        material.DisableKeyword("_ALPHATEST_ON");
+        material.DisableKeyword("_ALPHAPREMULTIPLY_ON");
+        material.renderQueue = (int)UnityEngine.Rendering.RenderQueue.Transparent;
+        EditorUtility.SetDirty(material);
+    }
+
+    private static void SetMaterialColor(Material material, string propertyName, Color color)
+    {
+        if (material.HasProperty(propertyName))
+            material.SetColor(propertyName, color);
     }
 
     private static Material LoadMaterial(string path)

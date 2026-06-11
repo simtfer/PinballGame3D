@@ -37,6 +37,14 @@ public class PinballTableBuilderEditor : Editor
         {
             CreateDefaultMaterials();
         }
+
+        EditorGUILayout.Space();
+        EditorGUILayout.LabelField("Cyberpunk Style", EditorStyles.boldLabel);
+
+        if (GUILayout.Button("Setup Cyberpunk Generator", GUILayout.Height(25)))
+        {
+            SetupCyberpunkGenerator();
+        }
     }
 
     private void CreateDefaultPrefabs()
@@ -145,27 +153,141 @@ public class PinballTableBuilderEditor : Editor
             AssetDatabase.CreateFolder("Assets", "Materials");
 
         Shader neonShader = Shader.Find("Pinball/NeonGlow");
-        if (neonShader == null) neonShader = Shader.Find("Universal Render Pipeline/Lit");
+        if (neonShader == null)
+            neonShader = Shader.Find("Universal Render Pipeline/Lit");
+        if (neonShader == null)
+            neonShader = Shader.Find("Standard");
 
-        CreateMaterial(matPath, "TableSurface", neonShader, new Color(0.05f, 0.05f, 0.15f), new Color(0.1f, 0.1f, 0.3f));
-        CreateMaterial(matPath, "Wall", neonShader, new Color(0.2f, 0.2f, 0.4f), new Color(0.3f, 0.3f, 0.8f));
-        CreateMaterial(matPath, "Bumper", neonShader, new Color(0.2f, 0.6f, 1f), new Color(0.2f, 0.6f, 1f));
-        CreateMaterial(matPath, "Flipper", neonShader, new Color(0.8f, 0.2f, 0.2f), new Color(1f, 0.3f, 0.3f));
-        CreateMaterial(matPath, "NeonStrip", neonShader, Color.black, new Color(0f, 1f, 1f));
-        CreateMaterial(matPath, "Ball", neonShader, new Color(0.8f, 0.8f, 0.8f), new Color(0f, 1f, 1f));
+        Shader glassShader = Shader.Find("Universal Render Pipeline/Lit");
+        if (glassShader == null)
+            glassShader = Shader.Find("Standard");
+        if (glassShader == null)
+            glassShader = neonShader;
+
+        CreateMaterial(matPath, "TableSurface", neonShader, new Color(0.015f, 0.02f, 0.06f, 1f), new Color(0.02f, 0.08f, 0.16f, 1f), 0.7f);
+        CreateMaterial(matPath, "Wall", neonShader, new Color(0.02f, 0.08f, 0.12f, 1f), new Color(0f, 0.9f, 1f, 1f), 1.8f);
+        CreateMaterial(matPath, "Bumper", neonShader, new Color(0.05f, 0.08f, 0.18f, 1f), new Color(1f, 0.92f, 0.08f, 1f), 2.1f);
+        CreateMaterial(matPath, "Flipper", neonShader, new Color(1f, 0.02f, 0.38f, 1f), new Color(1f, 0f, 0.72f, 1f), 1.9f);
+        CreateMaterial(matPath, "NeonStrip", neonShader, new Color(0.005f, 0.005f, 0.02f, 1f), new Color(0f, 1f, 1f, 1f), 2.4f);
+        CreateMaterial(matPath, "Ball", neonShader, new Color(0.82f, 0.95f, 1f, 1f), new Color(0f, 0.85f, 1f, 1f), 1.4f);
+
+        Material safetyPanel = CreateMaterial(matPath, "SafetyPanel", glassShader, new Color(0.05f, 0.9f, 1f, 0.28f), new Color(0f, 0.85f, 1f, 1f), 0.8f);
+        ConfigureTransparentMaterial(safetyPanel, new Color(0.05f, 0.9f, 1f, 0.28f));
+
+        AssignCreatedMaterials(matPath);
 
         AssetDatabase.SaveAssets();
         AssetDatabase.Refresh();
         Debug.Log("Default materials created in Assets/Materials/");
     }
 
-    private void CreateMaterial(string path, string name, Shader shader, Color baseColor, Color emissionColor)
+    private Material CreateMaterial(string path, string name, Shader shader, Color baseColor, Color emissionColor, float glowIntensity)
     {
-        Material mat = new Material(shader);
-        mat.SetColor("_BaseColor", baseColor);
-        mat.SetColor("_EmissionColor", emissionColor);
-        mat.SetFloat("_GlowIntensity", 1.5f);
-        AssetDatabase.CreateAsset(mat, $"{path}/{name}.mat");
+        string assetPath = $"{path}/{name}.mat";
+        Material mat = AssetDatabase.LoadAssetAtPath<Material>(assetPath);
+        if (mat == null)
+        {
+            mat = new Material(shader);
+            AssetDatabase.CreateAsset(mat, assetPath);
+        }
+        else if (shader != null && mat.shader != shader)
+        {
+            mat.shader = shader;
+        }
+
+        SetMaterialColor(mat, "_BaseColor", baseColor);
+        SetMaterialColor(mat, "_Color", baseColor);
+        SetMaterialColor(mat, "_EmissionColor", emissionColor);
+
+        if (mat.HasProperty("_GlowIntensity"))
+            mat.SetFloat("_GlowIntensity", glowIntensity);
+        if (mat.HasProperty("_Smoothness"))
+            mat.SetFloat("_Smoothness", 0.78f);
+        if (mat.HasProperty("_Metallic"))
+            mat.SetFloat("_Metallic", 0.05f);
+
+        if (emissionColor.maxColorComponent > 0f)
+            mat.EnableKeyword("_EMISSION");
+
+        EditorUtility.SetDirty(mat);
+        return mat;
+    }
+
+    private void ConfigureTransparentMaterial(Material material, Color glassColor)
+    {
+        if (material == null)
+            return;
+
+        SetMaterialColor(material, "_BaseColor", glassColor);
+        SetMaterialColor(material, "_Color", glassColor);
+
+        if (material.HasProperty("_Surface"))
+            material.SetFloat("_Surface", 1f);
+        if (material.HasProperty("_Blend"))
+            material.SetFloat("_Blend", 0f);
+        if (material.HasProperty("_AlphaClip"))
+            material.SetFloat("_AlphaClip", 0f);
+        if (material.HasProperty("_Mode"))
+            material.SetFloat("_Mode", 3f);
+        if (material.HasProperty("_SrcBlend"))
+            material.SetInt("_SrcBlend", (int)UnityEngine.Rendering.BlendMode.SrcAlpha);
+        if (material.HasProperty("_DstBlend"))
+            material.SetInt("_DstBlend", (int)UnityEngine.Rendering.BlendMode.OneMinusSrcAlpha);
+        if (material.HasProperty("_ZWrite"))
+            material.SetInt("_ZWrite", 0);
+
+        material.SetOverrideTag("RenderType", "Transparent");
+        material.EnableKeyword("_SURFACE_TYPE_TRANSPARENT");
+        material.EnableKeyword("_ALPHABLEND_ON");
+        material.DisableKeyword("_ALPHATEST_ON");
+        material.DisableKeyword("_ALPHAPREMULTIPLY_ON");
+        material.renderQueue = (int)UnityEngine.Rendering.RenderQueue.Transparent;
+        EditorUtility.SetDirty(material);
+    }
+
+    private void AssignCreatedMaterials(string path)
+    {
+        PinballTableBuilder builder = (PinballTableBuilder)target;
+        Undo.RecordObject(builder, "Assign Pinball Materials");
+        builder.tableSurfaceMaterial = AssetDatabase.LoadAssetAtPath<Material>($"{path}/TableSurface.mat");
+        builder.wallMaterial = AssetDatabase.LoadAssetAtPath<Material>($"{path}/Wall.mat");
+        builder.bumperMaterial = AssetDatabase.LoadAssetAtPath<Material>($"{path}/Bumper.mat");
+        builder.flipperMaterial = AssetDatabase.LoadAssetAtPath<Material>($"{path}/Flipper.mat");
+        builder.neonMaterial = AssetDatabase.LoadAssetAtPath<Material>($"{path}/NeonStrip.mat");
+        builder.safetyPanelMaterial = AssetDatabase.LoadAssetAtPath<Material>($"{path}/SafetyPanel.mat");
+        EditorUtility.SetDirty(builder);
+    }
+
+    private void SetupCyberpunkGenerator()
+    {
+        PinballTableBuilder builder = (PinballTableBuilder)target;
+        Undo.RecordObject(builder, "Setup Cyberpunk Generator");
+
+        CyberpunkMaterialGenerator generator = builder.GetComponent<CyberpunkMaterialGenerator>();
+        if (generator == null)
+        {
+            generator = Undo.AddComponent<CyberpunkMaterialGenerator>(builder.gameObject);
+        }
+
+        builder.cyberpunkGenerator = generator;
+        builder.useCyberpunkStyle = true;
+        EditorUtility.SetDirty(builder);
+
+        GameSceneSetup setup = FindObjectOfType<GameSceneSetup>();
+        if (setup != null)
+        {
+            Undo.RecordObject(setup, "Wire Cyberpunk Generator");
+            setup.cyberpunkGenerator = generator;
+            EditorUtility.SetDirty(setup);
+        }
+
+        Debug.Log("Cyberpunk generator wired up to PinballTableBuilder and GameSceneSetup");
+    }
+
+    private void SetMaterialColor(Material material, string propertyName, Color color)
+    {
+        if (material.HasProperty(propertyName))
+            material.SetColor(propertyName, color);
     }
 }
 #endif
