@@ -14,7 +14,12 @@ public class PinballTableBuilder : MonoBehaviour
     public Material wallMaterial;
     public Material bumperMaterial;
     public Material flipperMaterial;
+    public Material safetyPanelMaterial;
     public Material neonMaterial;
+
+    [Header("Cyberpunk")]
+    public CyberpunkMaterialGenerator cyberpunkGenerator;
+    public bool useCyberpunkStyle = true;
 
     [Header("Prefabs")]
     public GameObject bumperPrefab;
@@ -32,6 +37,12 @@ public class PinballTableBuilder : MonoBehaviour
 
     public void BuildTable()
     {
+        if (useCyberpunkStyle && cyberpunkGenerator != null)
+        {
+            cyberpunkGenerator.GenerateMaterials();
+            ApplyCyberpunkMaterials();
+        }
+
         ClearExistingTable();
         CreateTableSurface();
         CreateWalls();
@@ -40,6 +51,8 @@ public class PinballTableBuilder : MonoBehaviour
         CreateSlingshots();
         CreateTargets();
         CreateRamps();
+        CreateLaunchLaneReturnDeflector();
+        CreateSafetyPanel();
         ApplyTilt();
     }
 
@@ -247,10 +260,66 @@ public class PinballTableBuilder : MonoBehaviour
         }
     }
 
+    private void CreateLaunchLaneReturnDeflector()
+    {
+        Transform root = transform.Find("TableRoot");
+        float laneCenterX = tableWidth / 2f - 0.1f;
+        float laneExitZ = 0.1f;
+
+        GameObject deflector = GameObject.CreatePrimitive(PrimitiveType.Cube);
+        deflector.name = "LaunchLaneReturnDeflector";
+        deflector.transform.SetParent(root);
+        deflector.transform.localPosition = new Vector3(laneCenterX - 0.12f, wallHeight / 2f, laneExitZ);
+        deflector.transform.localRotation = Quaternion.Euler(0f, 35f, 0f);
+        deflector.transform.localScale = new Vector3(0.12f, wallHeight, 0.85f);
+
+        Renderer renderer = deflector.GetComponent<Renderer>();
+        if (neonMaterial != null)
+            renderer.material = neonMaterial;
+        else if (wallMaterial != null)
+            renderer.material = wallMaterial;
+
+        BoxCollider deflectorCollider = deflector.GetComponent<BoxCollider>();
+        deflectorCollider.isTrigger = true;
+
+        LaunchLaneReturnDeflectorController deflectorController = deflector.AddComponent<LaunchLaneReturnDeflectorController>();
+        deflectorController.launchDirection = Vector3.forward;
+        deflectorController.returnRedirectDirection = new Vector3(-1f, 0f, 0.6f);
+        deflectorController.deflectorRenderer = deflector.GetComponent<MeshRenderer>();
+    }
+
+    private void CreateSafetyPanel()
+    {
+        Transform root = transform.Find("TableRoot");
+
+        GameObject panel = GameObject.CreatePrimitive(PrimitiveType.Cube);
+        panel.name = "SafetyPanel";
+        panel.transform.SetParent(root);
+        panel.transform.localPosition = new Vector3(0f, wallHeight + 0.25f, 0f);
+        panel.transform.localScale = new Vector3(tableWidth + wallThickness * 2f, 0.08f, tableHeight + wallThickness * 2f);
+
+        Renderer renderer = panel.GetComponent<Renderer>();
+        if (safetyPanelMaterial != null)
+            renderer.material = safetyPanelMaterial;
+
+        BoxCollider panelCollider = panel.GetComponent<BoxCollider>();
+        panelCollider.isTrigger = false;
+    }
+
     private void ApplyTilt()
     {
         Transform root = transform.Find("TableRoot");
         if (root != null)
             root.localRotation = Quaternion.Euler(-tableTilt, 0, 0);
+    }
+
+    private void ApplyCyberpunkMaterials()
+    {
+        tableSurfaceMaterial = cyberpunkGenerator.GetTableSurfaceMaterial();
+        wallMaterial = cyberpunkGenerator.GetWallMaterial();
+        bumperMaterial = cyberpunkGenerator.GetBumperMaterial();
+        flipperMaterial = cyberpunkGenerator.GetFlipperMaterial();
+        safetyPanelMaterial = cyberpunkGenerator.GetNeonMaterial();
+        neonMaterial = cyberpunkGenerator.GetNeonMaterial();
     }
 }
