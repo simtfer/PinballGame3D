@@ -59,12 +59,11 @@ public class CameraController : MonoBehaviour
 
         if (target != null && trackBall)
         {
+            Vector3 basePos = transform.parent != null
+                ? transform.parent.position + offset
+                : offset;
             Vector3 ballOffset = target.position + offset;
-            Vector3 trackPos = Vector3.Lerp(
-                transform.parent != null ? transform.parent.position + offset : offset,
-                ballOffset,
-                ballTrackWeight
-            );
+            Vector3 trackPos = Vector3.Lerp(basePos, ballOffset, ballTrackWeight);
 
             Vector3 targetPos = Vector3.Lerp(transform.position, trackPos, followSpeed * Time.deltaTime);
             desiredPos = targetPos;
@@ -75,7 +74,9 @@ public class CameraController : MonoBehaviour
         }
         else
         {
-            desiredPos = offset;
+            desiredPos = transform.parent != null
+                ? transform.parent.position + offset
+                : offset;
             transform.LookAt(lookAtOffset);
         }
 

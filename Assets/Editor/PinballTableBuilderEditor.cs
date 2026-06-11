@@ -100,7 +100,7 @@ public class PinballTableBuilderEditor : Editor
         ball.AddComponent<SphereCollider>();
         ball.AddComponent<Rigidbody>();
         ball.AddComponent<AudioSource>();
-        ball.transform.localScale = Vector3.one * 0.3f;
+        ball.transform.localScale = Vector3.one;
 
         TrailRenderer trail = ball.AddComponent<TrailRenderer>();
         trail.time = 0.5f;

@@ -114,8 +114,12 @@ public class PlungerController : MonoBehaviour
     {
         if (Input.touchCount > 0)
         {
-            Touch touch = Input.GetTouch(0);
-            return touch.phase == TouchPhase.Began;
+            for (int i = 0; i < Input.touchCount; i++)
+            {
+                Touch touch = Input.GetTouch(i);
+                if (touch.phase == TouchPhase.Began)
+                    return true;
+            }
         }
         return false;
     }
@@ -124,8 +128,12 @@ public class PlungerController : MonoBehaviour
     {
         if (Input.touchCount > 0)
         {
-            Touch touch = Input.GetTouch(0);
-            return touch.phase == TouchPhase.Ended;
+            for (int i = 0; i < Input.touchCount; i++)
+            {
+                Touch touch = Input.GetTouch(i);
+                if (touch.phase == TouchPhase.Ended)
+                    return true;
+            }
         }
         return false;
     }

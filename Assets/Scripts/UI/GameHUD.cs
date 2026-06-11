@@ -73,7 +73,7 @@ public class GameHUD : MonoBehaviour
         if (highScoreText != null)
             highScoreText.text = "BEST: " + FormatScore(GameManager.Instance.HighScore);
 
-        if (scoreAnimator != null)
+        if (scoreAnimator != null && !scoreAnimator.GetCurrentAnimatorStateInfo(0).IsName("ScoreUpdate"))
             scoreAnimator.SetTrigger("ScoreUpdate");
     }
 

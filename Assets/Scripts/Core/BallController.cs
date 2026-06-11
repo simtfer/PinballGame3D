@@ -9,6 +9,7 @@ public class BallController : MonoBehaviour
     public float minSpeed = 0.5f;
     public float drag = 0.1f;
     public float angularDrag = 0.5f;
+    public float ballLostThreshold = -5f;
     public PhysicMaterial physicMaterial;
 
     [Header("Visual Settings")]
@@ -75,7 +76,7 @@ public class BallController : MonoBehaviour
             _rb.velocity = _rb.velocity.normalized * maxSpeed;
         }
 
-        if (transform.position.y < -5f)
+        if (transform.position.y < ballLostThreshold)
         {
             OnBallFallen();
         }

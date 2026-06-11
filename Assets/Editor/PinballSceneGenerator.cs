@@ -65,7 +65,7 @@ public static class PinballSceneGenerator
 
         CreateBasicEventSystem();
 
-        tableBuilder.BuildTableWithoutCyberpunk();
+        tableBuilder.BuildTable();
         AlignCameraToTable(mainCamera, tableBuilder);
 
         Selection.activeGameObject = gameSceneSetup.gameObject;

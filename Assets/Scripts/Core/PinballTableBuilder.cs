@@ -178,10 +178,15 @@ public class PinballTableBuilder : MonoBehaviour
 
         if (flipperPrefab != null)
         {
-            Instantiate(flipperPrefab, new Vector3(-1.2f, flipperY, flipperZ),
+            GameObject leftFlipper = Instantiate(flipperPrefab, new Vector3(-1.2f, flipperY, flipperZ),
                 Quaternion.Euler(0, 25, 0), root);
-            Instantiate(flipperPrefab, new Vector3(1.2f, flipperY, flipperZ),
+            FlipperController leftCtrl = leftFlipper.GetComponent<FlipperController>();
+            if (leftCtrl != null) leftCtrl.isLeftFlipper = true;
+
+            GameObject rightFlipper = Instantiate(flipperPrefab, new Vector3(1.2f, flipperY, flipperZ),
                 Quaternion.Euler(0, -25, 0), root);
+            FlipperController rightCtrl = rightFlipper.GetComponent<FlipperController>();
+            if (rightCtrl != null) rightCtrl.isLeftFlipper = false;
         }
     }
 
@@ -293,9 +298,6 @@ public class PinballTableBuilder : MonoBehaviour
             renderer.material = neonMaterial;
         else if (wallMaterial != null)
             renderer.material = wallMaterial;
-
-        BoxCollider deflectorCollider = deflector.GetComponent<BoxCollider>();
-        deflectorCollider.isTrigger = true;
 
         LaunchLaneReturnDeflectorController deflectorController = deflector.AddComponent<LaunchLaneReturnDeflectorController>();
         deflectorController.launchDirection = Vector3.forward;

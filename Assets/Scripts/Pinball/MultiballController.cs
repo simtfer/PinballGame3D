@@ -28,6 +28,7 @@ public class MultiballController : MonoBehaviour
     private int _hitCount;
     private float _hitTimer;
     private bool _isMultiballActive;
+    private bool _isSpawning;
     private List<BallController> _extraBalls = new List<BallController>();
     private AudioSource _audioSource;
 
@@ -67,9 +68,10 @@ public class MultiballController : MonoBehaviour
 
     public void ActivateMultiball()
     {
-        if (_isMultiballActive) return;
+        if (_isMultiballActive || _isSpawning) return;
 
         _isMultiballActive = true;
+        _isSpawning = true;
         _hitCount = 0;
 
         if (activationEffect != null) activationEffect.Play();
@@ -87,6 +89,7 @@ public class MultiballController : MonoBehaviour
             yield return new WaitForSeconds(spawnDelay);
             SpawnExtraBall(i);
         }
+        _isSpawning = false;
     }
 
     private void SpawnExtraBall(int index)

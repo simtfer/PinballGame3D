@@ -123,6 +123,7 @@ public class TargetBankController : MonoBehaviour
     public AudioClip completeSound;
 
     private AudioSource _audioSource;
+    private bool _completed;
 
     private void Awake()
     {
@@ -134,7 +135,8 @@ public class TargetBankController : MonoBehaviour
 
     private void Update()
     {
-        CheckAllTargetsHit();
+        if (!_completed)
+            CheckAllTargetsHit();
     }
 
     private void CheckAllTargetsHit()
@@ -153,8 +155,15 @@ public class TargetBankController : MonoBehaviour
 
         if (allHit)
         {
+            _completed = true;
             OnBankComplete();
+            Invoke(nameof(ResetCompleted), resetDelay);
         }
+    }
+
+    private void ResetCompleted()
+    {
+        _completed = false;
     }
 
     private void OnBankComplete()

@@ -6,10 +6,15 @@ public class ScorePopupSpawner : MonoBehaviour
     public Camera uiCamera;
     public Transform ballTransform;
 
+    private int _lastScore;
+
     private void Start()
     {
         if (GameManager.Instance != null)
+        {
             GameManager.Instance.OnScoreChanged += OnScoreChanged;
+            _lastScore = GameManager.Instance.Score;
+        }
 
         if (uiCamera == null)
             uiCamera = Camera.main;
@@ -25,12 +30,13 @@ public class ScorePopupSpawner : MonoBehaviour
     {
         if (ballTransform == null || uiCamera == null) return;
 
-        float multiplier = GameManager.Instance != null ? GameManager.Instance.ComboMultiplier : 1f;
-        int baseScore = GameManager.Instance != null
-            ? Mathf.RoundToInt(newScore / multiplier)
-            : 100;
+        int delta = newScore - _lastScore;
+        _lastScore = newScore;
 
-        SpawnPopup(ballTransform.position, baseScore, multiplier);
+        if (delta <= 0) return;
+
+        float multiplier = GameManager.Instance != null ? GameManager.Instance.ComboMultiplier : 1f;
+        SpawnPopup(ballTransform.position, delta, multiplier);
     }
 
     public void SpawnPopup(Vector3 worldPos, int score, float multiplier)

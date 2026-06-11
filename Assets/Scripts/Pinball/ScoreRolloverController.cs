@@ -82,6 +82,7 @@ public class RolloverBankController : MonoBehaviour
     public AudioClip completeSound;
 
     private AudioSource _audioSource;
+    private bool _completed;
 
     private void Awake()
     {
@@ -92,7 +93,8 @@ public class RolloverBankController : MonoBehaviour
 
     private void Update()
     {
-        CheckAllLit();
+        if (!_completed)
+            CheckAllLit();
     }
 
     private void CheckAllLit()
@@ -111,6 +113,7 @@ public class RolloverBankController : MonoBehaviour
 
         if (allLit)
         {
+            _completed = true;
             OnAllLit();
         }
     }
@@ -133,5 +136,6 @@ public class RolloverBankController : MonoBehaviour
         if (rollovers == null) return;
         foreach (var rollover in rollovers)
             rollover.ResetRollover();
+        _completed = false;
     }
 }

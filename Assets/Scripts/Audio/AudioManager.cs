@@ -64,13 +64,22 @@ public class AudioManager : MonoBehaviour
         LoadVolumes();
     }
 
+    private System.Collections.IEnumerator _currentMusicFade;
+
     public void PlayMusic(AudioClip clip, bool fade = true)
     {
         if (musicSource == null || clip == null) return;
 
+        if (_currentMusicFade != null)
+        {
+            StopCoroutine(_currentMusicFade);
+            _currentMusicFade = null;
+        }
+
         if (fade && musicSource.isPlaying)
         {
-            StartCoroutine(CrossFadeMusic(clip));
+            _currentMusicFade = CrossFadeMusic(clip);
+            StartCoroutine(_currentMusicFade);
         }
         else
         {
@@ -144,5 +153,6 @@ public class AudioManager : MonoBehaviour
         }
 
         musicSource.volume = musicVolume;
+        _currentMusicFade = null;
     }
 }
