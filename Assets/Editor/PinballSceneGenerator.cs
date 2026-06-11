@@ -63,13 +63,9 @@ public static class PinballSceneGenerator
             cameraController,
             tableBuilder);
 
-        CyberpunkMaterialGenerator cyberpunkGenerator = gameSceneSetup.gameObject.AddComponent<CyberpunkMaterialGenerator>();
-        tableBuilder.cyberpunkGenerator = cyberpunkGenerator;
-        gameSceneSetup.cyberpunkGenerator = cyberpunkGenerator;
-
         CreateBasicEventSystem();
 
-        tableBuilder.BuildTable();
+        tableBuilder.BuildTableWithoutCyberpunk();
         AlignCameraToTable(mainCamera, tableBuilder);
 
         Selection.activeGameObject = gameSceneSetup.gameObject;

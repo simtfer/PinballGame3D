@@ -56,6 +56,21 @@ public class PinballTableBuilder : MonoBehaviour
         ApplyTilt();
     }
 
+    public void BuildTableWithoutCyberpunk()
+    {
+        ClearExistingTable();
+        CreateTableSurface();
+        CreateWalls();
+        CreateFlippers();
+        CreateBumpers();
+        CreateSlingshots();
+        CreateTargets();
+        CreateRamps();
+        CreateLaunchLaneReturnDeflector();
+        CreateSafetyPanel();
+        ApplyTilt();
+    }
+
     private void ClearExistingTable()
     {
         Transform tableRoot = transform.Find("TableRoot");
