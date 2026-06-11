@@ -217,15 +217,20 @@ public static class PinballSceneGenerator
         if (glassShader == null)
             glassShader = neonShader;
 
-        CreateOrUpdateMaterial(matPath, "TableSurface", neonShader, new Color(0.015f, 0.02f, 0.06f, 1f), new Color(0.02f, 0.08f, 0.16f, 1f), 0.7f);
-        CreateOrUpdateMaterial(matPath, "Wall", neonShader, new Color(0.02f, 0.08f, 0.12f, 1f), new Color(0f, 0.9f, 1f, 1f), 1.8f);
-        CreateOrUpdateMaterial(matPath, "Bumper", neonShader, new Color(0.05f, 0.08f, 0.18f, 1f), new Color(1f, 0.92f, 0.08f, 1f), 2.1f);
-        CreateOrUpdateMaterial(matPath, "Flipper", neonShader, new Color(1f, 0.02f, 0.38f, 1f), new Color(1f, 0f, 0.72f, 1f), 1.9f);
-        CreateOrUpdateMaterial(matPath, "NeonStrip", neonShader, new Color(0.005f, 0.005f, 0.02f, 1f), new Color(0f, 1f, 1f, 1f), 2.4f);
-        CreateOrUpdateMaterial(matPath, "Ball", neonShader, new Color(0.82f, 0.95f, 1f, 1f), new Color(0f, 0.85f, 1f, 1f), 1.4f);
+        Color cyberpunkBase = new Color(0.04f, 0.04f, 0.18f, 1f);      // 深蓝紫 #0a0a2e
+        Color neonPink = new Color(1f, 0.176f, 0.584f, 1f);             // 霓虹粉 #ff2d95
+        Color neonCyan = new Color(0f, 1f, 1f, 1f);                     // 青色 #00ffff
+        Color wallPurple = new Color(0.2f, 0.1f, 0.3f, 1f);            // 深紫
 
-        Material safetyPanel = CreateOrUpdateMaterial(matPath, "SafetyPanel", glassShader, new Color(0.05f, 0.9f, 1f, 0.28f), new Color(0f, 0.85f, 1f, 1f), 0.8f);
-        ConfigureTransparentMaterial(safetyPanel, new Color(0.05f, 0.9f, 1f, 0.28f));
+        CreateOrUpdateMaterial(matPath, "TableSurface", neonShader, cyberpunkBase, cyberpunkBase * 0.3f, 0.8f);
+        CreateOrUpdateMaterial(matPath, "Wall", neonShader, wallPurple, neonCyan, 1.5f);
+        CreateOrUpdateMaterial(matPath, "Bumper", neonShader, neonPink, neonPink, 2f);
+        CreateOrUpdateMaterial(matPath, "Flipper", neonShader, neonCyan, neonCyan, 2f);
+        CreateOrUpdateMaterial(matPath, "NeonStrip", neonShader, cyberpunkBase, neonCyan, 2.5f);
+        CreateOrUpdateMaterial(matPath, "Ball", neonShader, new Color(0.8f, 0.9f, 1f, 1f), neonCyan, 1.5f);
+
+        Material safetyPanel = CreateOrUpdateMaterial(matPath, "SafetyPanel", glassShader, new Color(0.1f, 0.15f, 0.3f, 0.2f), neonCyan * 0.5f, 0.5f);
+        ConfigureTransparentMaterial(safetyPanel, new Color(0.1f, 0.15f, 0.3f, 0.2f));
 
         AssetDatabase.SaveAssets();
         AssetDatabase.Refresh();
@@ -288,9 +293,9 @@ public static class PinballSceneGenerator
 
         material.SetOverrideTag("RenderType", "Transparent");
         material.EnableKeyword("_SURFACE_TYPE_TRANSPARENT");
-        material.EnableKeyword("_ALPHABLEND_ON");
+        material.EnableKeyword("_ALPHAPREMULTIPLY_ON");
         material.DisableKeyword("_ALPHATEST_ON");
-        material.DisableKeyword("_ALPHAPREMULTIPLY_ON");
+        material.DisableKeyword("_ALPHABLEND_ON");
         material.renderQueue = (int)UnityEngine.Rendering.RenderQueue.Transparent;
         EditorUtility.SetDirty(material);
     }
