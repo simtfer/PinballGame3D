@@ -9,6 +9,8 @@ Shader "Pinball/NeonGlow"
         _Smoothness ("Smoothness", Range(0,1)) = 0.5
         _PulseSpeed ("Pulse Speed", Float) = 1.0
         _PulseAmplitude ("Pulse Amplitude", Float) = 0.5
+        _FresnelPower ("Fresnel Power", Float) = 3.0
+        _FresnelIntensity ("Fresnel Intensity", Float) = 0.5
     }
 
     SubShader
@@ -55,6 +57,8 @@ Shader "Pinball/NeonGlow"
                 float _Smoothness;
                 float _PulseSpeed;
                 float _PulseAmplitude;
+                float _FresnelPower;
+                float _FresnelIntensity;
             CBUFFER_END
 
             Varyings vert(Attributes input)
@@ -86,8 +90,12 @@ Shader "Pinball/NeonGlow"
                 float pulse = sin(_Time.y * _PulseSpeed) * _PulseAmplitude;
                 float3 emission = _EmissionColor.rgb * _GlowIntensity * (1.0 + pulse);
 
-                float3 ambient = float3(0.05, 0.05, 0.1);
+                float3 ambient = float3(0.02, 0.02, 0.08); // 更暗的环境光增强对比
                 float3 finalColor = (_BaseColor.rgb * (diffuse + ambient)) + specular + emission;
+
+                // 添加边缘发光效果
+                float fresnel = pow(1.0 - saturate(dot(normalWS, viewDir)), _FresnelPower);
+                finalColor += _EmissionColor.rgb * fresnel * _FresnelIntensity;
 
                 float fogFactor = input.fogFactor;
                 finalColor = MixFog(finalColor, fogFactor);
